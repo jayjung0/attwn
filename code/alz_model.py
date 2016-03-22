@@ -15,8 +15,8 @@ class alz_model(object):
 
 	def fit(self, Xtrain):
 		self.ss.fit(Xtrain)
-		self.pca.fit(Xtrain)
-		self.gkde = scs.gaussian_kde(self.pca.transform(Xtrain)[:, :2].T)
+		self.pca.fit(self.ss.transform(Xtrain))
+		self.gkde = scs.gaussian_kde(self._transform(Xtrain)[:, :2].T)
 
 	def predict(self, X):
 		self.X = self._transform(X)[:, :2]
