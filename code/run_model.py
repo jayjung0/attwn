@@ -9,32 +9,34 @@ import seaborn as sns
 db_in = 'ac_features'
 num_train = 30
 
-columns = ['unique_words_pct', 'indef_words_pct', \
-'2_grams_avg', '3_grams_avg', '4_grams_avg']#,'adj_noun_ratio', \
-# 'adj_pct',  '5_grams_avg', 'verb_pct', 'adj_verb_ratio', 'unique_verbs_pct','word_counts_avg']
+columns = ['indef_words_pct','3_grams_avg','4_grams_avg','5_grams_avg',\
+			'unique_verbs_pct', 'adj_verb_ratio']
 
 model = alz_model.alz_model()
 engine = create_engine('postgresql://jayjung@localhost:5432/alz')
 df_in = pd.read_sql_query('select * from ' + db_in + ';', con=engine)
 df_in.sort('year', inplace=True)
 X = df_in[columns].values
-Xtrain = X[:num_train].copy()
-model.fit(Xtrain)
-p = model.predict(X)
+
+model.plot(X, num_train, 1890, [0, 73], df_in.year.values, connect_scatter=True)
+
+# Xtrain = X[:num_train].copy()
+# model.fit(Xtrain)
+# p = model.predict(X)
 
 
-def estimate_gaussian(X):
-    m, n = X.shape
-    mu = np.mean(X,axis=0)
-    cov = np.cov(X.T)
-    return mu, cov
-mu, cov = estimate_gaussian(model.X[:num_train,:2])
-g=sns.jointplot(model.X[:num_train,0],model.X[:num_train,1], kind="kde", size=10)
-g.ax_joint.scatter(model.X[:,0],model.X[:,1],c='r')
+# def estimate_gaussian(X):
+#     m, n = X.shape
+#     mu = np.mean(X,axis=0)
+#     cov = np.cov(X.T)
+#     return mu, cov
+# mu, cov = estimate_gaussian(model.X[:num_train,:2])
+# g=sns.jointplot(model.X[:num_train,0],model.X[:num_train,1], kind="kde", size=10)
+# g.ax_joint.scatter(model.X[:,0],model.X[:,1],c='r')
 
-for i, txt in enumerate(np.arange(len(model.X))):
-    g.ax_joint.annotate(txt, (model.X[i,0],model.X[i,1]))
-plt.show()
+# for i, txt in enumerate(np.arange(len(model.X))):
+#     g.ax_joint.annotate(txt, (model.X[i,0],model.X[i,1]))
+# plt.show()
 
 # #make plots
 # xmin = model.X[:,0].min()-np.std(model.X[:,0])
