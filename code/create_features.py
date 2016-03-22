@@ -1,8 +1,6 @@
 import pandas as pd
 import numpy as np
 from sqlalchemy import create_engine
-import re
-from collections import Counter
 import json
 
 def create_all_features(db_in, db_out):

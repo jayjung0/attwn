@@ -1,5 +1,4 @@
-import pandas as pd 
-import numpy as np 
+import numpy as np
 import scipy.stats as scs
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
@@ -29,7 +28,7 @@ class alz_model(object):
 		return self.gkde(X)
 
 	def plot(self, X, train_size, birth_year, ind_splits, years, save_plot=False,\
-	save_name='alz_plot', connect_scatter=False):
+			save_name='alz_plot', connect_scatter=False):
 		'''
 		Inputs are feature matrix X in chronological order, training size train_size,
 		year of author's birth, list of indices to split for charts (for example,
@@ -71,18 +70,3 @@ class alz_model(object):
 				plt.savefig(plt_name, bbox_inches='tight',dpi=300)#, pad_inches=1)
 			else:
 				plt.show()
-
-
-
-# db_in = 'rm_features'
-# columns = ['unique_words_pct', 'indef_words_pct', 'word_counts_avg',\
-# 'adj_pct', 'verb_pct', 'adj_verb_ratio', 'adj_noun_ratio', \
-# 'unique_verbs_pct', '2_grams_avg', '3_grams_avg', '4_grams_avg', '5_grams_avg']
-
-# model = alz_model()
-# engine = create_engine('postgresql://jayjung@localhost:5432/alz')
-# df_in = pd.read_sql_query('select * from ' + db_in + ';', con=engine)
-# X = df_in[columns].values
-# Xtrain = X[:9].copy()
-# model.fit(Xtrain)
-# p = model.predict(X)
