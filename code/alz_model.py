@@ -25,7 +25,7 @@ class alz_model(object):
 		return self.gkde(self.X.T)
 
 	def predict_contour(self, X):
-		return self.gkde(X)
+		return self.gkde(X) 
 
 	def plot(self, X, train_size, birth_year, ind_splits, years, save_plot=False,\
 			save_name='alz_plot', connect_scatter=False):
