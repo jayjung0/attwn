@@ -20,6 +20,10 @@ This is a contour plot of the first two principal components fit to a Gaussian K
 Interesting features that stood out:
 ##### Coming Soon
 
+## Model Instructions
+1. Create tables of parsed books using create_tables.py.  Must input a database with name of books, year of publications, and text of books
+2. Create features from parsed books using create_features.py
+3. Create model with alz_model.py.  Fit model to data, then predict values or make plots.
 
 ## Technologies Used
 * Python

@@ -52,8 +52,6 @@ class alz_model(object):
 
 		for tup in izip(ind_splits[:-1], ind_splits[1:]):
 			fig, ax = plt.subplots(figsize=(15, 9))
-			# fig.figure(figsize=(15,9))
-			# plt.contourf(X,Y,Z,8, cmap='Blues',alpha=.7)
 			plt.contour(XX, YY, Z, 8, cmap='Blues_r', alpha=.7)
 			s = np.zeros(len(X_transform))
 			s[tup[0]: tup[1]] = 50
@@ -63,8 +61,6 @@ class alz_model(object):
 				plt.plot(X_transform[:, 0], X_transform[:, 1], ls='-.')
 			ax.set_xlim([xmin, xmax])
 			ax.set_ylim([ymin, ymax])
-			# ax.set_xticklabels([])
-			# ax.set_yticklabels([])
 			if save_plot:
 				plt_name = save_name + '_%s_%s' % (str(tup[0]), str(tup[1]))
 				plt.savefig(plt_name, bbox_inches='tight',dpi=300)#, pad_inches=1)
