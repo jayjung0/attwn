@@ -6,23 +6,26 @@ import re
 from collections import Counter
 import spacy
 import json
+import sys
 
-def create_parsed_books_table(db_in, db_out):
+def create_parsed_books_table(db_in, db_out, engine_URL):
 	'''
 	Creates new database in postgres with parsed books
 	Input: db_in: string.  db containing name, year, and booktext for author
 		db_out:  string.  name of db to be created with books parsed
 	'''
-	engine = create_engine('postgresql://jayjung@localhost:5432/alz')
+	engine = create_engine(engine_URL)
 	df_in = pd.read_sql_query('select * from ' + db_in + ';', con=engine)
 	df = df_in[['name', 'year']].copy()
 	print 'step1'
-	make_nltk_features(df, df_in['book_text'], [words, unique_words, indef_dict, word_lengths], tokenizer=nltk.tokenize.RegexpTokenizer(r'\w+').tokenize)
+	make_nltk_features(df, df_in['book_text'], [words, unique_words, indef_dict, word_lengths], \
+		tokenizer=nltk.tokenize.RegexpTokenizer(r'\w+').tokenize)
 	print 'step2'
 	make_nltk_features(df, df_in['book_text'], [sentence_length])
 	print 'step3'
-	make_nltk_features(df, df_in['book_text'], [word_counts, n_grams], tokenizer=nltk.tokenize.RegexpTokenizer(r'\w+').tokenize, \
-	 lemmatizer=nltk.wordnet.WordNetLemmatizer())
+	make_nltk_features(df, df_in['book_text'], [word_counts, n_grams], \
+		tokenizer=nltk.tokenize.RegexpTokenizer(r'\w+').tokenize, \
+		lemmatizer=nltk.wordnet.WordNetLemmatizer())
 	print 'step4'
 	make_POS_features(df, df_in['book_text'], [verb_counts, adj_counts])
 	df.to_sql(db_out, engine, if_exists='replace', chunksize=20000)
@@ -35,15 +38,12 @@ def make_nltk_features(df, books, feat_names, tokenizer=None, grouping=None, lem
 		if tokenizer:
 			book = tokenizer(book)
 			if lemmatizer:
-				book = map(lambda y: lemmatizer.lemmatize(y, 'v'), map(lambda x: lemmatizer.lemmatize(x.lower()), book))
+				book = map(lambda y: lemmatizer.lemmatize(y, 'v'), map(lambda x: \
+					lemmatizer.lemmatize(x.lower()), book))
 		for i, feat in enumerate(feat_names):
 			feat_list[i].append(feat(book))
 	for i, feat in enumerate(feat_names):
 		df[feat.__name__] = feat_list[i]
-
-def make_nltk_features2(df, books, feat_names, tokenizer=None, grouping=None, lemmatizer=None):
-	for feat in feat_names:
-		df[feat.__name__] = books
 
 def make_POS_features(df, books, feat_names):
 	# make Pos features using spacy
@@ -57,7 +57,7 @@ def make_POS_features(df, books, feat_names):
 		for token in book:
 			book_pos_list.append([token.lemma_, token.pos_])
 		all_books_pos_list.append(book_pos_list)
-		pos_counter.append(json.dumps(Counter(np.array(book_pos_list)[:,1])))
+		pos_counter.append(json.dumps(Counter(np.array(book_pos_list)[:, 1])))
 	for feat in feat_names:
 		#for each feature, get run each feature in each book, append to df
 		lst = []
@@ -68,11 +68,11 @@ def make_POS_features(df, books, feat_names):
 
 def verb_counts(lst):
 	lst = np.array(lst)
-	return json.dumps(Counter(lst[lst[:,1] == 'VERB'][:,0]))
+	return json.dumps(Counter(lst[lst[:, 1] == 'VERB'][:, 0]))
 
 def adj_counts(lst):
 	lst = np.array(lst)
-	return json.dumps(Counter(lst[lst[:,1] == 'ADJ'][:,0]))
+	return json.dumps(Counter(lst[lst[:, 1] == 'ADJ'][:, 0]))
 
 def words(lst):
 	# returns number of words in book
@@ -85,8 +85,10 @@ def unique_words(lst):
 def indef_dict(lst):
 	# returns dictionary of indefite words and their count
 	myDict = {}
-	indefinite_words = ('anybody','anyone','anything','everybody','everyone','everything','nobody','none','nothing','somebody',\
-		'someone','something','all','another','any','each','either','few','many','neither','one','some','several')
+	indefinite_words = ('anybody', 'anyone', 'anything', 'everybody', 'everyone', \
+		'everything', 'nobody', 'none', 'nothing', 'somebody', 'someone', 'something', \
+		'all', 'another', 'any', 'each', 'either', 'few', 'many', 'neither', 'one', \
+		'some', 'several')
 	myDict = myDict.fromkeys(indefinite_words, 0)
 	for word in lst:
 		if word.lower() in myDict:
@@ -116,5 +118,11 @@ def n_grams(lst):
 		myLst.append(fdist.values())
 	return json.dumps(myLst)
 
-# create_parsed_books_table('ac_books', 'ac_parsed_books')
-create_parsed_books_table('sk_books', 'sk_parsed_books')
+if __name__ == '__main__':
+	'''
+	Inputs:  1 - database containing title, year, and texts of books
+			 2 - name of output database in postgres
+			 3 - URL to connect to database.  for example: 'postgresql://jayjung@localhost:5432/alz'
+	Outputs:  postgres database
+	'''
+	create_parsed_books_table(sys.argv[1], sys.argv[2], sys.argv[3])
